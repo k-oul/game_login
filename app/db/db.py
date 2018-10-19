@@ -37,39 +37,25 @@ CREATE TABLE `auto_import` (
   PRIMARY KEY (`ID`,`room_id`),
   UNIQUE KEY `import_depulicate_keys` (`room_id`,`player_id`,`union_id`) USING BTREE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-"""
 
-# data = {
-#
-#     'ID': str(uuid.uuid1()),
-#     'room_id': temp[2],
-#     'union_account': temp[12],
-#     'paiju_type': temp[0],
-#     'paiju_name': temp[1].encode(),
-#     'jianjuzhe_name': temp[3],
-#     'mangzhu': temp[4],
-#     'table': temp[6],
-#     'shichang': temp[7],
-#     'shoushu': temp[8],
-#     'player_id': temp[9],
-#     'player_name': temp[10],
-#     'union_id': temp[11],
-#     'union_name': temp[12],
-#     'mairu': temp[13],
-#     'daichu': temp[14],
-#     'baoxian_mairu': temp[15],
-#     'baoxian_shouru': temp[16],
-#     'baoxian_total': temp[17],
-#     'baoxian_club': temp[18],
-#     'baoxian': temp[19],
-#     'zhanji': temp[20],
-#     'over_time': temp[21],
-#     'update_time': datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#     'encode_paiju_name': str(temp[1].encode()),
-#     'status': 0,
-#     'ismvp': ismvp,
-#     'count_mvp': count_mvp,
-# }
+CREATE TABLE `check_buyin` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `gameRoomName` varchar(40) NOT NULL COMMENT '牌局名',
+  `gameRoomId` varchar(40) NOT NULL COMMENT '牌局名',
+  `showId` varchar(20) NOT NULL COMMENT '玩家ID',
+  `strNick` varchar(40) NOT NULL COMMENT '玩家昵称',
+  `buyStack` int(7) NOT NULL COMMENT '申请数量',
+  `totalBuyin` int(10) NOT NULL COMMENT '总买入',
+  `totalProfit` int(10) NOT NULL COMMENT '总盈亏',
+  `update_time` datetime NOT NULL COMMENT '申请时间',
+  `status` int(1) NOT NULL COMMENT '审核通过或拒绝',
+  `token` varchar(255) NOT NULL DEFAULT '' COMMENT 'token',
+  `uuid` varchar(20) NOT NULL DEFAULT '' COMMENT 'uuid',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `import_depulicate_keys` (`buyStack`,`totalBuyin`,`totalProfit`) USING BTREE
+) ENGINE=MyISAM AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
+
+"""
 
 import pymysql
 from config import *
@@ -90,7 +76,7 @@ class MySQL():
             self.db = pymysql.connect(host, username, password, database, charset='utf8', port=port)
             self.cursor = self.db.cursor()
         except pymysql.MySQLError as e:
-            print(e.args)
+            print('数据库连接错误：', e.args)
 
     def insert(self, table, data):
         """
@@ -99,13 +85,13 @@ class MySQL():
         :param data:
         :return:
         """
-        keys =  '`' + '`,`'.join(data.keys()) + '`'
+        keys = '`' + '`,`'.join(data.keys()) + '`'
         values = ', '.join(['%s'] * len(data))
         sql_query = 'insert ignore into %s (%s) values (%s) ' % (table, keys, values)
         try:
             self.cursor.execute(sql_query, tuple(data.values()))
             self.db.commit()
+            # print('{} : 入库成功！'.format(table))
         except pymysql.MySQLError as e:
-            print(e.args)
+            print('{} : 入库失败！'.format(table), e)
             self.db.rollback()
-

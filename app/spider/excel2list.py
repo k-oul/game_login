@@ -4,14 +4,12 @@
 # @Author  : K_oul
 # @File    : excel2list.py
 # @Software: PyCharm
-import json
 
 import xlrd
 
 
-# 把excel表格中指定sheet转为json
+# 转换excel
 def excel2list(file_path):
-    # 打开excel文件
     if get_data(file_path) is not None:
         book = get_data(file_path)
         # 抓取所有sheet页的名称
@@ -24,9 +22,9 @@ def excel2list(file_path):
         # print (result)
         return res
 
+
 # 获取excel数据源
 def get_data(file_path):
-    """获取excel数据源"""
     try:
         data = xlrd.open_workbook(file_contents=file_path)
         return data
@@ -37,5 +35,3 @@ def get_data(file_path):
 
 if __name__ == '__main__':
     pass
-    # file_path = 'hostory.xls'
-    # list_data = excel2list(file_path)
